@@ -13,7 +13,15 @@ public class Model {
     private int pc_number; //Arvuti mõeldud number
     private int steps; //Käikude lugeja
     private boolean game_over; // Kas mäng on läbi
+    private boolean isBackdoorUsed = false;  // Tagauks
 
+    /**
+     * Tagaukse kasutamine
+     * @return tagauks
+     */
+    public boolean isBackdoorUsed() {
+        return isBackdoorUsed;
+    }
 
     /**'
      * Uuue mängu loomine
@@ -22,6 +30,7 @@ public class Model {
         pc_number = new Random().nextInt(MAXIMUM - MINIMUM + 1) + MINIMUM;
         game_over = false;
         steps = 0;
+        isBackdoorUsed = false;
 
     }
 
@@ -57,6 +66,11 @@ public class Model {
      * @return tekst mida näidatakse kasutajale
      */
     public String checkGuess(int guess) {
+        if (guess == 1000) {
+            game_over = true;
+            isBackdoorUsed = true;
+            return "Tagauks on lahti! Õige number on: " + pc_number;
+        }
         steps++;
         if (guess == pc_number) {
             game_over = true;
@@ -72,13 +86,14 @@ public class Model {
      * Salvestab listisisu (edetabeli) uuesti faili (kirjutab üle)
      * @param  name faili üle kirjutamine
      */
-    public void saveScore(String name) {
+    public void saveScore(String name, long durationMillis) {
         loadScores(); //laeb failst sisu listi
-        scoreboard.add(new Content(name, steps)); // Lisa nimi ja sammude arv LISTI
+        String timestamp = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+        scoreboard.add(new Content(timestamp, name, steps, durationMillis)); // Lisa nimi ja sammude arv LISTI
         Collections.sort(scoreboard); //Sorteerib listi
         try (PrintWriter out = new PrintWriter(new FileWriter(filename))) {
             for (Content c : scoreboard) {
-                out.println(c.getName() + ";" + c.getSteps()); //Semikoolon juttumärkides!
+                out.println(c.getTimestamp() + ";" + c.getName() + ";" + c.getSteps() + ";" + c.getDurationMillis()); //Semikoolon juttumärkides!
             }
 
         } catch (IOException e) {
@@ -97,10 +112,12 @@ public class Model {
         try(Scanner sc = new Scanner(file)) {
             while (sc.hasNextLine()) {
                 String[] parts = sc.nextLine().split(";");
-                if (parts.length == 2) {
-                    String name = parts[0];
-                    int steps = Integer.parseInt(parts[1]);
-                    scoreboard.add(new Content(name, steps));
+                if (parts.length == 4) {
+                    String timestamp = parts[0];
+                    String name = parts[1];
+                    int steps = Integer.parseInt(parts[2]);
+                    long durationMillis = Long.parseLong(parts[3]);
+                    scoreboard.add(new Content(timestamp, name, steps, durationMillis));
                 }
             }
             Collections.sort(scoreboard); //Sorteerib listi

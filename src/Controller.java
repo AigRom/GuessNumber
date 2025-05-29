@@ -27,7 +27,7 @@ public class Controller {
             switch (choice) {
                 case 1:
                     model.initGame(); // loo uus mäng
-                    //view.showMessage(String.valueOf(model.getPc_number())); //TEST, mida arvuti mõtles
+                    view.showMessage(String.valueOf(model.getPc_number())); //TEST, mida arvuti mõtles
                     Stopwach stopwach = new Stopwach(); //loome stopperi
                     stopwach.start(); //käivitame stopperi
                     while (!model.isGame_over()) { //Kui mäng ei ole läbi
@@ -40,8 +40,13 @@ public class Controller {
 
 
                     view.showMessage("Mängu aeg: " + stopwach.getElapsedTime() + " (" + stopwach.getElapsedMillis() + ")");
-                    String name = view.askName();
-                    model.saveScore(name);
+
+                    if (!model.isBackdoorUsed()) {
+                        String name = view.askName();
+                        model.saveScore(name, stopwach.getElapsedMillis());
+                    } else {
+                        view.showMessage("Petist edetabelisse ei lisata!");
+                    }
 
                     break;
                 case 2:

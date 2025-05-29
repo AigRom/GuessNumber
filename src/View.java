@@ -40,8 +40,22 @@ public class View {
      * @return kasuraja sisestatud number
      */
     public int askGuess() {
-        System.out.print("Sisesta number: ");
-        return Integer.parseInt(scanner.nextLine());
+        while (true) {
+            System.out.print("Sisesta number: ");
+            String input = (scanner.nextLine().trim());
+
+            try {
+                int guess = Integer.parseInt(input);
+                if (guess >= 1 && guess <= 100 || guess == 1000) {
+                    return guess;
+                } else {
+                    System.out.println("Palun sisesta arv vahemikus 1-100.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("See ei ole arv. Palun proovi uuesti");
+            }
+        }
+
 
     }
 
